@@ -6,59 +6,104 @@ interface CodePreviewProps {
 
 const CodePreview = ({ themeData }: CodePreviewProps) => {
     const sampleCode = `import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckSquare, faEdit, faSquare, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 
-// Componente Tarea genera elementos individuales de tarea/actividad
-// Task component generates individual task/activity elements
-const Tarea = ({ tarea, toggleCompletada, editarTarea, eliminarTarea }) => {
-    const [editandoTarea, cambiarEditandoTarea] = useState(false);
-    const [nuevaTarea, cambiarNuevaTarea] = useState(tarea.texto);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        editarTarea(tarea.id, nuevaTarea);
-        cambiarEditandoTarea(false);
+// Component for managing a list of tasks
+const TaskManager = ({ tasks, onTaskUpdate }) => {
+    const [filter, setFilter] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
+    
+    // Filter tasks based on current filter
+    const filteredTasks = tasks.filter(task => {
+        if (filter === 'completed') {
+            return task.completed === true;
+        } else if (filter === 'pending') {
+            return task.completed === false;
+        }
+        return true;
+    });
+    
+    // Search functionality
+    const searchResults = filteredTasks.filter(task => {
+        return task.title.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+    
+    // Calculate statistics
+    const stats = {
+        total: tasks.length,
+        completed: tasks.filter(t => t.completed).length,
+        pending: tasks.filter(t => !t.completed).length
     };
-
+    
+    const handleTaskToggle = (taskId) => {
+        const updatedTasks = tasks.map(task => {
+            if (task.id === taskId) {
+                return { ...task, completed: !task.completed };
+            }
+            return task;
+        });
+        onTaskUpdate(updatedTasks);
+    };
+    
+    const handleBulkAction = (action) => {
+        let updatedTasks = [...tasks];
+        
+        switch (action) {
+            case 'completeAll':
+                updatedTasks = tasks.map(task => ({ ...task, completed: true }));
+                break;
+            case 'clearCompleted':
+                updatedTasks = tasks.filter(task => !task.completed);
+                break;
+            default:
+                return;
+        }
+        
+        onTaskUpdate(updatedTasks);
+    };
+    
     return (
-        <li className='lista-tareas__tarea'>
-            <FontAwesomeIcon 
-                icon={tarea.completada ? faCheckSquare : faSquare}
-                className='lista-tareas__icono lista-tareas__icono-check'
-                onClick={() => toggleCompletada(tarea.id)}
-            />
-            <div className='lista-tareas__texto'>
-                {editandoTarea ? (
-                    <form className='lista-tareas__formulario' onSubmit={handleSubmit}>
+        <div className="task-manager">
+            <h2>Task Manager ({stats.total} tasks)</h2>
+            
+            {/* Search and Filter Controls */}
+            <div className="controls">
+                <input 
+                    type="text" 
+                    placeholder="Search tasks..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                
+                <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+                    <option value="all">All Tasks</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            
+            {/* Task List */}
+            <ul className="task-list">
+                {searchResults.map(task => (
+                    <li key={task.id} className={task.completed ? 'completed' : ''}>
                         <input 
-                            type='text' 
-                            className='lista-tareas__input'
-                            value={nuevaTarea}
-                            onChange={(e) => cambiarNuevaTarea(e.target.value)}
+                            type="checkbox" 
+                            checked={task.completed}
+                            onChange={() => handleTaskToggle(task.id)}
                         />
-                    </form>
-                ) : (
-                    tarea.texto
-                )}
+                        <span>{task.title}</span>
+                    </li>
+                ))}
+            </ul>
+            
+            {/* Statistics */}
+            <div className="stats">
+                <p>Completed: {stats.completed} | Pending: {stats.pending}</p>
             </div>
-            <div className='lista-tareas__contenedor-botones'>
-                <FontAwesomeIcon 
-                    icon={faEdit}
-                    className='lista-tareas__icono lista-tareas__icono-accion'
-                    onClick={() => cambiarEditandoTarea(!editandoTarea)}
-                />
-                <FontAwesomeIcon 
-                    icon={faTimesCircle}
-                    className='lista-tareas__icono lista-tareas__icono-accion'
-                    onClick={() => eliminarTarea(tarea.id)}
-                />
-            </div>
-        </li>
+        </div>
     );
 };
 
-export default Tarea;`
+export default TaskManager;`
 
     const renderHighlightedCode = () => {
         const lines = sampleCode.split('\n')
@@ -66,51 +111,96 @@ export default Tarea;`
         return lines.map((line, index) => {
             let highlightedLine = line
 
-            // Highlight keywords
-            highlightedLine = highlightedLine.replace(
-                /\b(import|export|from|const|let|var|if|else|try|catch|finally|return|default|function|useState|useEffect)\b/g,
-                `<span style="color: ${themeData.keywords}">$1</span>`
-            )
+            // Process highlighting in order of specificity to avoid conflicts
 
-            // Highlight strings
-            highlightedLine = highlightedLine.replace(
-                /(['"`])((?:\\.|(?!\1)[^\\])*?)\1/g,
-                `<span style="color: ${themeData.strings}">$1$2$1</span>`
-            )
-
-            // Highlight numbers
-            highlightedLine = highlightedLine.replace(
-                /\b(\d+)\b/g,
-                `<span style="color: ${themeData.numbers}">$1</span>`
-            )
-
-            // Highlight comments
+            // Highlight comments first (they shouldn't be processed further)
             highlightedLine = highlightedLine.replace(
                 /(\/\/.*)/g,
                 `<span style="color: ${themeData.comments}">$1</span>`
             )
 
-            // Highlight function names
+            // Highlight strings (but not inside comments)
             highlightedLine = highlightedLine.replace(
-                /\b(\w+)\s*\(/g,
-                (match, funcName) => {
-                    if (!['if', 'for', 'while', 'switch', 'catch'].includes(funcName)) {
-                        return `<span style="color: ${themeData.functions}">${funcName}</span>(`
+                /(['"`])((?:\\.|(?!\1)[^\\])*?)\1/g,
+                (match, quote, content) => {
+                    // Don't highlight if this is inside a comment
+                    if (highlightedLine.includes(`<span style="color: ${themeData.comments}">`)) {
+                        return match;
                     }
-                    return match
+                    return `<span style="color: ${themeData.strings}">${quote}${content}${quote}</span>`;
                 }
             )
 
-            // Highlight types/interfaces
+            // Highlight numbers (but not inside strings or comments)
             highlightedLine = highlightedLine.replace(
-                /\b(React|FontAwesomeIcon|faCheckSquare|faEdit|faSquare|faTimesCircle)\b/g,
-                `<span style="color: ${themeData.types}">$1</span>`
+                /\b(\d+)\b/g,
+                (match) => {
+                    // Don't highlight if this is inside a comment or string
+                    if (highlightedLine.includes(`<span style="color: ${themeData.comments}">`) ||
+                        highlightedLine.includes(`<span style="color: ${themeData.strings}">`)) {
+                        return match;
+                    }
+                    return `<span style="color: ${themeData.numbers}">${match}</span>`;
+                }
             )
 
-            // Highlight variables
+            // Highlight keywords (but not inside strings or comments)
             highlightedLine = highlightedLine.replace(
-                /\b(tarea|toggleCompletada|editarTarea|eliminarTarea|editandoTarea|cambiarEditandoTarea|nuevaTarea|cambiarNuevaTarea|handleSubmit|e|id|texto|completada)\b/g,
-                `<span style="color: ${themeData.variables}">$1</span>`
+                /\b(import|export|from|const|let|var|if|else|try|catch|finally|return|default|function|useState|useEffect|switch|case|break|continue|for|while|do|in|of|new|class|extends|super|this|static|async|await|true|false|null|undefined)\b/g,
+                (match) => {
+                    // Don't highlight if this is inside a comment or string
+                    if (highlightedLine.includes(`<span style="color: ${themeData.comments}">`) ||
+                        highlightedLine.includes(`<span style="color: ${themeData.strings}">`)) {
+                        return match;
+                    }
+                    return `<span style="color: ${themeData.keywords}">${match}</span>`;
+                }
+            )
+
+            // Highlight function names (but not inside strings or comments)
+            highlightedLine = highlightedLine.replace(
+                /\b(\w+)\s*\(/g,
+                (match, funcName) => {
+                    // Don't highlight if this is inside a comment or string
+                    if (highlightedLine.includes(`<span style="color: ${themeData.comments}">`) ||
+                        highlightedLine.includes(`<span style="color: ${themeData.strings}">`)) {
+                        return match;
+                    }
+
+                    // Don't highlight keywords that are already highlighted
+                    const keywords = ['if', 'for', 'while', 'switch', 'catch', 'function'];
+                    if (keywords.includes(funcName)) {
+                        return match;
+                    }
+
+                    return `<span style="color: ${themeData.functions}">${funcName}</span>(`;
+                }
+            )
+
+            // Highlight types/interfaces (but not inside strings or comments)
+            highlightedLine = highlightedLine.replace(
+                /\b(React|TaskManager|useState|useEffect)\b/g,
+                (match) => {
+                    // Don't highlight if this is inside a comment or string
+                    if (highlightedLine.includes(`<span style="color: ${themeData.comments}">`) ||
+                        highlightedLine.includes(`<span style="color: ${themeData.strings}">`)) {
+                        return match;
+                    }
+                    return `<span style="color: ${themeData.types}">${match}</span>`;
+                }
+            )
+
+            // Highlight variables (but not inside strings or comments)
+            highlightedLine = highlightedLine.replace(
+                /\b(tasks|onTaskUpdate|filter|setFilter|searchTerm|setSearchTerm|filteredTasks|searchResults|stats|taskId|updatedTasks|action|task|completed|title|id)\b/g,
+                (match) => {
+                    // Don't highlight if this is inside a comment or string
+                    if (highlightedLine.includes(`<span style="color: ${themeData.comments}">`) ||
+                        highlightedLine.includes(`<span style="color: ${themeData.strings}">`)) {
+                        return match;
+                    }
+                    return `<span style="color: ${themeData.variables}">${match}</span>`;
+                }
             )
 
             return (
@@ -149,16 +239,16 @@ export default Tarea;`
                         <strong>EXPLORER</strong>
                     </div>
                     <div className="p-3 flex-1">
-                        <div className="mb-1">📁 COMPONENTS</div>
-                        <div className="ml-4 mb-1">📄 FormularioTareas.js</div>
-                        <div className="ml-4 mb-1">📄 Header.js</div>
+                        <div className="mb-1">📁 src</div>
+                        <div className="ml-4 mb-1">📁 utils</div>
+                        <div className="ml-8 mb-1">📄 taskHelpers.js</div>
+                        <div className="ml-4 mb-1">📄 App.js</div>
                         <div
                             className="ml-4 mb-1 px-2 py-1 rounded"
                             style={{ backgroundColor: themeData.selectionBackground }}
                         >
-                            📄 Tarea.js
+                            📄 index.js
                         </div>
-                        <div className="ml-4 mb-1">📄 ListaTareas.js</div>
                     </div>
                     <div className="p-3 border-t border-gray-300">
                         <div className="mb-1">📋 OUTLINE</div>
@@ -177,7 +267,7 @@ export default Tarea;`
                             className="px-4 py-1 rounded-t"
                             style={{ backgroundColor: themeData.editorBackground }}
                         >
-                            Tarea.js
+                            index.js
                         </div>
                     </div>
 
