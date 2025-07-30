@@ -42,7 +42,7 @@ const ThemeExporter = ({ theme }: ThemeExporterProps) => {
                 <Button
                     onClick={handleCopy}
                     disabled={copied}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 hover:cursor-pointer"
                 >
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     {copied ? 'Copied!' : 'Copy JSON'}
@@ -51,7 +51,7 @@ const ThemeExporter = ({ theme }: ThemeExporterProps) => {
                 <Button
                     onClick={handleDownload}
                     variant="secondary"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 hover:cursor-pointer"
                 >
                     <Download className="h-4 w-4" />
                     Download JSON
@@ -59,7 +59,7 @@ const ThemeExporter = ({ theme }: ThemeExporterProps) => {
             </div>
 
             {/* Theme JSON */}
-            <Card>
+            <Card className='border-gray-300'>
                 <CardHeader>
                     <CardTitle className="text-lg">Theme JSON</CardTitle>
                 </CardHeader>
@@ -73,7 +73,7 @@ const ThemeExporter = ({ theme }: ThemeExporterProps) => {
             </Card>
 
             {/* Instructions */}
-            <Card>
+            <Card className='border-gray-300'>
                 <CardHeader>
                     <CardTitle className="text-lg">How to use this theme</CardTitle>
                 </CardHeader>

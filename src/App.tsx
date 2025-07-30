@@ -105,7 +105,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-6 py-8 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             🎨 VS Code Theme Creator
@@ -121,13 +121,13 @@ function App() {
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Form Section - Centered */}
           <div className="flex justify-center">
-            <Card className="w-full max-w-4xl">
+            <Card className="w-full max-w-4xl border-gray-200">
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-center">
                   Theme Configuration
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="min-h-[300px]">
                 <ThemeForm
                   themeData={themeData}
                   onThemeChange={setThemeData}
@@ -138,7 +138,7 @@ function App() {
 
           {/* Preview Section - Below Form */}
           <div className="space-y-6">
-            <Card>
+            <Card className='border-gray-200'>
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-center">
                   VS Code Preview
@@ -149,7 +149,7 @@ function App() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className='border-gray-200'>
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-center">
                   Export Theme

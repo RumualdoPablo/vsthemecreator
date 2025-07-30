@@ -182,12 +182,12 @@ const CodePreview = ({ themeData }: CodePreviewProps) => {
     return (
         <div className="space-y-4">
             {/* Language Tabs */}
-            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg ">
                 {(['javascript', 'typescript', 'python'] as const).map((lang) => (
                     <button
                         key={lang}
                         onClick={() => setActiveTab(lang)}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === lang
+                        className={`hover:cursor-pointer px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === lang
                             ? 'bg-white text-gray-900 shadow-sm'
                             : 'text-gray-600 hover:text-gray-900'
                             }`}

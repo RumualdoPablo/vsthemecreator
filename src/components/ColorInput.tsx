@@ -143,7 +143,7 @@ const ColorInput = ({
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder="#000000"
-                    className="font-mono text-sm"
+                    className="font-mono text-sm border-gray-400"
                 />
             </div>
         </div>

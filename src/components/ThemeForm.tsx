@@ -82,10 +82,10 @@ const ThemeForm = ({ themeData, onThemeChange }: ThemeFormProps) => {
     return (
         <Tabs defaultValue="basic" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="basic">Basic</TabsTrigger>
-                <TabsTrigger value="editor">Editor</TabsTrigger>
-                <TabsTrigger value="ui">UI</TabsTrigger>
-                <TabsTrigger value="syntax">Syntax</TabsTrigger>
+                <TabsTrigger value="basic" className='hover:cursor-pointer'>Basic</TabsTrigger>
+                <TabsTrigger value="editor" className='hover:cursor-pointer'>Editor</TabsTrigger>
+                <TabsTrigger value="ui" className='hover:cursor-pointer'>UI</TabsTrigger>
+                <TabsTrigger value="syntax" className='hover:cursor-pointer'>Syntax</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4 mt-6">
@@ -97,6 +97,7 @@ const ThemeForm = ({ themeData, onThemeChange }: ThemeFormProps) => {
                                 id="name"
                                 value={themeData.name}
                                 onChange={(e) => handleChange('name', e.target.value)}
+                                className='border-gray-400'
                                 placeholder="My Custom Theme"
                             />
                         </div>
@@ -109,7 +110,7 @@ const ThemeForm = ({ themeData, onThemeChange }: ThemeFormProps) => {
                                 id="type"
                                 value={themeData.type}
                                 onChange={(e) => handleChange('type', e.target.value as 'dark' | 'light')}
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex h-10 w-full rounded-md border border-gray-400 bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <option value="dark">Dark</option>
                                 <option value="light">Light</option>
