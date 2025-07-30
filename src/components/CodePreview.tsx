@@ -1,112 +1,55 @@
 import { ThemeFormData } from '../types/theme'
+import { useState, useRef, useEffect } from 'react'
+import { codeSamples } from '../samples'
 
 interface CodePreviewProps {
     themeData: ThemeFormData
 }
 
 const CodePreview = ({ themeData }: CodePreviewProps) => {
-    const sampleCode = `import React, { useState, useEffect } from 'react';
+    const [activeTab, setActiveTab] = useState<'javascript' | 'typescript' | 'python'>('javascript')
+    const [height, setHeight] = useState(384) // 24rem = 384px
+    const [isResizing, setIsResizing] = useState(false)
+    const containerRef = useRef<HTMLDivElement>(null)
 
-// Component for managing a list of tasks
-const TaskManager = ({ tasks, onTaskUpdate }) => {
-    const [filter, setFilter] = useState('all');
-    const [searchTerm, setSearchTerm] = useState('');
-    
-    // Filter tasks based on current filter
-    const filteredTasks = tasks.filter(task => {
-        if (filter === 'completed') {
-            return task.completed === true;
-        } else if (filter === 'pending') {
-            return task.completed === false;
-        }
-        return true;
-    });
-    
-    // Search functionality
-    const searchResults = filteredTasks.filter(task => {
-        return task.title.toLowerCase().includes(searchTerm.toLowerCase());
-    });
-    
-    // Calculate statistics
-    const stats = {
-        total: tasks.length,
-        completed: tasks.filter(t => t.completed).length,
-        pending: tasks.filter(t => !t.completed).length
-    };
-    
-    const handleTaskToggle = (taskId) => {
-        const updatedTasks = tasks.map(task => {
-            if (task.id === taskId) {
-                return { ...task, completed: !task.completed };
+    // Handle mouse events for resizing
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizing || !containerRef.current) return
+
+            const containerRect = containerRef.current.getBoundingClientRect()
+            const newHeight = e.clientY - containerRect.top
+
+            // Set minimum and maximum height constraints
+            const minHeight = 300 // 18.75rem
+            const maxHeight = 800 // 50rem
+
+            if (newHeight >= minHeight && newHeight <= maxHeight) {
+                setHeight(newHeight)
             }
-            return task;
-        });
-        onTaskUpdate(updatedTasks);
-    };
-    
-    const handleBulkAction = (action) => {
-        let updatedTasks = [...tasks];
-        
-        switch (action) {
-            case 'completeAll':
-                updatedTasks = tasks.map(task => ({ ...task, completed: true }));
-                break;
-            case 'clearCompleted':
-                updatedTasks = tasks.filter(task => !task.completed);
-                break;
-            default:
-                return;
         }
-        
-        onTaskUpdate(updatedTasks);
-    };
-    
-    return (
-        <div className="task-manager">
-            <h2>Task Manager ({stats.total} tasks)</h2>
-            
-            {/* Search and Filter Controls */}
-            <div className="controls">
-                <input 
-                    type="text" 
-                    placeholder="Search tasks..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                
-                <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-                    <option value="all">All Tasks</option>
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                </select>
-            </div>
-            
-            {/* Task List */}
-            <ul className="task-list">
-                {searchResults.map(task => (
-                    <li key={task.id} className={task.completed ? 'completed' : ''}>
-                        <input 
-                            type="checkbox" 
-                            checked={task.completed}
-                            onChange={() => handleTaskToggle(task.id)}
-                        />
-                        <span>{task.title}</span>
-                    </li>
-                ))}
-            </ul>
-            
-            {/* Statistics */}
-            <div className="stats">
-                <p>Completed: {stats.completed} | Pending: {stats.pending}</p>
-            </div>
-        </div>
-    );
-};
 
-export default TaskManager;`
+        const handleMouseUp = () => {
+            setIsResizing(false)
+        }
 
-    const renderHighlightedCode = () => {
-        const lines = sampleCode.split('\n')
+        if (isResizing) {
+            document.addEventListener('mousemove', handleMouseMove)
+            document.addEventListener('mouseup', handleMouseUp)
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove)
+            document.removeEventListener('mouseup', handleMouseUp)
+        }
+    }, [isResizing])
+
+    const handleMouseDown = () => {
+        setIsResizing(true)
+    }
+
+    const renderHighlightedCode = (code: string, language: string) => {
+        const lines = code.split('\n')
 
         return lines.map((line, index) => {
             let highlightedLine = line
@@ -114,10 +57,17 @@ export default TaskManager;`
             // Process highlighting in order of specificity to avoid conflicts
 
             // Highlight comments first (they shouldn't be processed further)
-            highlightedLine = highlightedLine.replace(
-                /(\/\/.*)/g,
-                `<span style="color: ${themeData.comments}">$1</span>`
-            )
+            if (language === 'python') {
+                highlightedLine = highlightedLine.replace(
+                    /(#.*)/g,
+                    `<span style="color: ${themeData.comments}">$1</span>`
+                )
+            } else {
+                highlightedLine = highlightedLine.replace(
+                    /(\/\/.*)/g,
+                    `<span style="color: ${themeData.comments}">$1</span>`
+                )
+            }
 
             // Highlight strings (but not inside comments)
             highlightedLine = highlightedLine.replace(
@@ -144,9 +94,15 @@ export default TaskManager;`
                 }
             )
 
-            // Highlight keywords (but not inside strings or comments)
+            // Highlight keywords (language-specific)
+            const keywords = language === 'python'
+                ? /\b(import|from|class|def|if|else|elif|try|except|finally|return|True|False|None|for|while|in|is|not|and|or|with|as|lambda|yield|raise|assert|break|continue|pass|del|global|nonlocal)\b/g
+                : language === 'typescript'
+                    ? /\b(import|export|from|const|let|var|if|else|try|catch|finally|return|default|function|useState|useEffect|switch|case|break|continue|for|while|do|in|of|new|class|extends|super|this|static|async|await|true|false|null|undefined|interface|type|enum|namespace|declare|module|export|import|as|type|readonly|public|private|protected|abstract|implements|extends|interface|class|enum|namespace|declare|module|export|import|as|type|readonly|public|private|protected|abstract|implements)\b/g
+                    : /\b(import|export|from|const|let|var|if|else|try|catch|finally|return|default|function|useState|useEffect|switch|case|break|continue|for|while|do|in|of|new|class|extends|super|this|static|async|await|true|false|null|undefined)\b/g;
+
             highlightedLine = highlightedLine.replace(
-                /\b(import|export|from|const|let|var|if|else|try|catch|finally|return|default|function|useState|useEffect|switch|case|break|continue|for|while|do|in|of|new|class|extends|super|this|static|async|await|true|false|null|undefined)\b/g,
+                keywords,
                 (match) => {
                     // Don't highlight if this is inside a comment or string
                     if (highlightedLine.includes(`<span style="color: ${themeData.comments}">`) ||
@@ -168,7 +124,7 @@ export default TaskManager;`
                     }
 
                     // Don't highlight keywords that are already highlighted
-                    const keywords = ['if', 'for', 'while', 'switch', 'catch', 'function'];
+                    const keywords = ['if', 'for', 'while', 'switch', 'catch', 'function', 'def', 'class'];
                     if (keywords.includes(funcName)) {
                         return match;
                     }
@@ -177,9 +133,15 @@ export default TaskManager;`
                 }
             )
 
-            // Highlight types/interfaces (but not inside strings or comments)
+            // Highlight types/interfaces (language-specific)
+            const types = language === 'python'
+                ? /\b(str|int|float|bool|list|dict|tuple|set|Optional|List|Dict|Union|Enum|dataclass|datetime)\b/g
+                : language === 'typescript'
+                    ? /\b(React|TaskManager|useState|useEffect|Task|TaskManagerProps|FilterType|BulkAction|React\.FC|string|boolean|number|void|any|unknown|never|object|array|Promise|Date)\b/g
+                    : /\b(React|TaskManager|useState|useEffect)\b/g;
+
             highlightedLine = highlightedLine.replace(
-                /\b(React|TaskManager|useState|useEffect)\b/g,
+                types,
                 (match) => {
                     // Don't highlight if this is inside a comment or string
                     if (highlightedLine.includes(`<span style="color: ${themeData.comments}">`) ||
@@ -190,9 +152,15 @@ export default TaskManager;`
                 }
             )
 
-            // Highlight variables (but not inside strings or comments)
+            // Highlight variables (language-specific)
+            const variables = language === 'python'
+                ? /\b(tasks|filter_type|search_term|filtered_tasks|search_results|stats|task_id|updated_tasks|action|task|completed|title|id|priority|created_at|manager|filename|data|task_data|f|pending_tasks)\b/g
+                : language === 'typescript'
+                    ? /\b(tasks|onTaskUpdate|filter|setFilter|searchTerm|setSearchTerm|filteredTasks|searchResults|stats|taskId|updatedTasks|action|task|completed|title|id|priority|createdAt|Task|TaskManagerProps|FilterType|BulkAction|React\.FC|React\.ChangeEvent|HTMLInputElement|HTMLSelectElement)\b/g
+                    : /\b(tasks|onTaskUpdate|filter|setFilter|searchTerm|setSearchTerm|filteredTasks|searchResults|stats|taskId|updatedTasks|action|task|completed|title|id)\b/g;
+
             highlightedLine = highlightedLine.replace(
-                /\b(tasks|onTaskUpdate|filter|setFilter|searchTerm|setSearchTerm|filteredTasks|searchResults|stats|taskId|updatedTasks|action|task|completed|title|id)\b/g,
+                variables,
                 (match) => {
                     // Don't highlight if this is inside a comment or string
                     if (highlightedLine.includes(`<span style="color: ${themeData.comments}">`) ||
@@ -213,14 +181,34 @@ export default TaskManager;`
 
     return (
         <div className="space-y-4">
+            {/* Language Tabs */}
+            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                {(['javascript', 'typescript', 'python'] as const).map((lang) => (
+                    <button
+                        key={lang}
+                        onClick={() => setActiveTab(lang)}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === lang
+                            ? 'bg-white text-gray-900 shadow-sm'
+                            : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                    >
+                        {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                    </button>
+                ))}
+            </div>
+
             {/* VS Code Interface */}
             <div
-                className="flex h-96 border border-gray-300 rounded-lg overflow-hidden shadow-lg"
-                style={{ backgroundColor: themeData.editorBackground }}
+                ref={containerRef}
+                className="border border-gray-300 rounded-lg overflow-hidden shadow-lg relative"
+                style={{
+                    backgroundColor: themeData.editorBackground,
+                    height: `${height}px`
+                }}
             >
                 {/* Activity Bar */}
                 <div
-                    className="w-12 flex flex-col items-center pt-5 border-r border-gray-300"
+                    className="w-12 flex flex-col items-center pt-5 border-r border-gray-300 absolute left-0 top-0 bottom-0"
                     style={{ backgroundColor: themeData.activityBarBackground, color: themeData.activityBarForeground }}
                 >
                     <div className="mb-5 text-lg">📁</div>
@@ -232,7 +220,7 @@ export default TaskManager;`
 
                 {/* Sidebar */}
                 <div
-                    className="w-64 flex flex-col"
+                    className="w-64 flex flex-col absolute left-12 top-0 bottom-0"
                     style={{ backgroundColor: themeData.sidebarBackground, color: themeData.sidebarForeground }}
                 >
                     <div className="p-3 border-b border-gray-300">
@@ -240,14 +228,11 @@ export default TaskManager;`
                     </div>
                     <div className="p-3 flex-1">
                         <div className="mb-1">📁 src</div>
-                        <div className="ml-4 mb-1">📁 utils</div>
-                        <div className="ml-8 mb-1">📄 taskHelpers.js</div>
-                        <div className="ml-4 mb-1">📄 App.js</div>
                         <div
                             className="ml-4 mb-1 px-2 py-1 rounded"
                             style={{ backgroundColor: themeData.selectionBackground }}
                         >
-                            📄 index.js
+                            📄 {codeSamples[activeTab].filename}
                         </div>
                     </div>
                     <div className="p-3 border-t border-gray-300">
@@ -257,7 +242,7 @@ export default TaskManager;`
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col absolute left-76 top-0 right-0 bottom-0">
                     {/* Tab Bar */}
                     <div
                         className="h-9 flex items-center px-3 border-b border-gray-300"
@@ -267,7 +252,7 @@ export default TaskManager;`
                             className="px-4 py-1 rounded-t"
                             style={{ backgroundColor: themeData.editorBackground }}
                         >
-                            index.js
+                            {codeSamples[activeTab].filename}
                         </div>
                     </div>
 
@@ -288,32 +273,47 @@ export default TaskManager;`
                             }}
                         />
                         <div className="relative z-10">
-                            {renderHighlightedCode()}
+                            {renderHighlightedCode(codeSamples[activeTab].code, activeTab)}
                         </div>
                     </div>
 
                     {/* Status Bar */}
                     <div
-                        className="h-6 flex items-center px-3 text-xs border-t border-gray-300"
+                        className="h-6 flex items-center px-3 text-xs border-t border-gray-300 mb-2"
                         style={{ backgroundColor: themeData.statusBarBackground, color: themeData.statusBarForeground }}
                     >
                         <span className="mr-5">Ln 1, Col 1</span>
                         <span className="mr-5">Spaces: 2</span>
                         <span className="mr-5">UTF-8</span>
                         <span className="mr-5">CRLF</span>
-                        <span className="mr-5">JavaScript</span>
+                        <span className="mr-5">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
                         <span className="ml-auto">Prettier</span>
                     </div>
+                </div>
+
+                {/* Resize Handle */}
+                <div
+                    className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize transition-colors flex items-center justify-center"
+                    onMouseDown={handleMouseDown}
+                    style={{
+                        backgroundColor: isResizing ? '#e5e7eb' : '#f3f4f6',
+                        cursor: isResizing ? 'ns-resize' : 'ns-resize'
+                    }}
+                >
+                    <div className="w-8 h-1 bg-gray-400 rounded-full"></div>
                 </div>
             </div>
 
             {/* Info */}
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded mt-10">
                 <p className="text-sm text-blue-800">
-                    This preview shows how your theme will look in VS Code with a realistic interface.
+                    This preview shows how your theme will look in VS Code with different programming languages.
                 </p>
-                <p className="text-sm text-blue-700 mt-1">
-                    The highlighted line represents the current cursor position.
+                <p className="text-sm text-blue-800 mt-1">
+                    Switch between tabs to see syntax highlighting for JavaScript, TypeScript, and Python.
+                </p>
+                <p className="text-sm text-blue-800 mt-1">
+                    Drag the bottom handle to resize the preview window height.
                 </p>
             </div>
         </div>
