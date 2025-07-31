@@ -17,7 +17,7 @@ A web application that allows you to create and customize your own Visual Studio
 
 ### Live Demo
 
-🌐 **Try it online**: [VS Code Theme Creator](https://yourusername.github.io/vsthemecreator/)
+🌐 **Try it online**: [VS Code Theme Creator](https://rumualdopablo.github.io/vsthemecreator/)
 
 ### Prerequisites
 
