@@ -35,17 +35,12 @@ const ThemeForm = ({ themeData, onThemeChange }: ThemeFormProps) => {
         ))
     }
 
-    const distributeFields = (fields: ColorFieldConfig[], columns: number = 3) => {
-        const result = []
-        for (let i = 0; i < columns; i++) {
-            const columnFields = fields.filter((_, index) => index % columns === i)
-            result.push(
-                <div key={i} className="space-y-4">
-                    {renderColorInputs(columnFields)}
-                </div>
-            )
-        }
-        return result
+    const distributeFields = (fields: ColorFieldConfig[]) => {
+        return fields.map((field) => (
+            <div key={field.key} className="w-full">
+                {renderColorInputs([field])}
+            </div>
+        ))
     }
 
     // Field configurations
@@ -81,63 +76,55 @@ const ThemeForm = ({ themeData, onThemeChange }: ThemeFormProps) => {
 
     return (
         <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="basic" className='hover:cursor-pointer'>Basic</TabsTrigger>
-                <TabsTrigger value="editor" className='hover:cursor-pointer'>Editor</TabsTrigger>
-                <TabsTrigger value="ui" className='hover:cursor-pointer'>UI</TabsTrigger>
-                <TabsTrigger value="syntax" className='hover:cursor-pointer'>Syntax</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+                <TabsTrigger value="basic" className='hover:cursor-pointer text-xs sm:text-sm'>Basic</TabsTrigger>
+                <TabsTrigger value="editor" className='hover:cursor-pointer text-xs sm:text-sm'>Editor</TabsTrigger>
+                <TabsTrigger value="ui" className='hover:cursor-pointer text-xs sm:text-sm'>UI</TabsTrigger>
+                <TabsTrigger value="syntax" className='hover:cursor-pointer text-xs sm:text-sm'>Syntax</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4 mt-6">
-                <div className="grid grid-cols-3 gap-6">
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Theme Name</Label>
-                            <Input
-                                id="name"
-                                value={themeData.name}
-                                onChange={(e) => handleChange('name', e.target.value)}
-                                className='border-gray-400'
-                                placeholder="My Custom Theme"
-                            />
-                        </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="name" className="h-6 flex items-center">Theme Name</Label>
+                        <Input
+                            id="name"
+                            value={themeData.name}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                            className='border-gray-400 h-10'
+                            placeholder="My Custom Theme"
+                        />
                     </div>
 
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="type">Theme Type</Label>
-                            <select
-                                id="type"
-                                value={themeData.type}
-                                onChange={(e) => handleChange('type', e.target.value as 'dark' | 'light')}
-                                className="flex h-10 w-full rounded-md border border-gray-400 bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <option value="dark">Dark</option>
-                                <option value="light">Light</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        {/* Empty column for balance */}
+                    <div className="space-y-2">
+                        <Label htmlFor="type" className="h-6 flex items-center">Theme Type</Label>
+                        <select
+                            id="type"
+                            value={themeData.type}
+                            onChange={(e) => handleChange('type', e.target.value as 'dark' | 'light')}
+                            className="flex h-10 w-full rounded-md border border-gray-400 bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                        </select>
                     </div>
                 </div>
             </TabsContent>
 
             <TabsContent value="editor" className="space-y-4 mt-6">
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {distributeFields(editorFields)}
                 </div>
             </TabsContent>
 
             <TabsContent value="ui" className="space-y-4 mt-6">
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {distributeFields(uiFields)}
                 </div>
             </TabsContent>
 
             <TabsContent value="syntax" className="space-y-4 mt-6">
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {distributeFields(syntaxFields)}
                 </div>
             </TabsContent>

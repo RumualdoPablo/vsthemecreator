@@ -110,19 +110,15 @@ const ColorInput = ({
 
     return (
         <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium h-6 flex items-center">
                 {label}
-                {description && (
-                    <span className="text-xs text-muted-foreground ml-2">
-                        {description}
-                    </span>
-                )}
+
             </Label>
             <div className="flex gap-2 relative">
                 <Button
                     ref={buttonRef}
                     variant="outline"
-                    className="w-16 h-10 p-0 border-2 hover:opacity-80 transition-opacity"
+                    className="w-16 h-10 p-0 border-2 hover:opacity-80 transition-opacity flex-shrink-0"
                     style={{ backgroundColor: value }}
                     onClick={toggleDropdown}
                 >
@@ -143,7 +139,7 @@ const ColorInput = ({
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder="#000000"
-                    className="font-mono text-sm border-gray-400"
+                    className="font-mono text-sm border-gray-400 h-10"
                 />
             </div>
         </div>

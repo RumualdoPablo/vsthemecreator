@@ -106,63 +106,66 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-6 py-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        <div className="container mx-auto px-1 sm:px-2 py-6 sm:py-8 text-center">
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">
             🎨 VS Code Theme Creator
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-base sm:text-lg text-gray-600">
             Create and customize your own Visual Studio Code themes
           </p>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        <div className="max-w-6xl mx-auto space-y-8">
-          {/* Form Section - Centered */}
-          <div className="flex justify-center">
-            <Card className="w-full max-w-4xl border-gray-200">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold text-center">
-                  Theme Configuration
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="min-h-[300px]">
-                <ThemeForm
-                  themeData={themeData}
-                  onThemeChange={setThemeData}
-                />
-              </CardContent>
-            </Card>
+      <main className="container mx-auto px-1 sm:px-2 py-8">
+        <div className="max-w-none mx-auto space-y-6">
+          {/* Form and Preview Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4">
+            {/* Form Section */}
+            <div className="w-full">
+              <Card className="w-full border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold text-center">
+                    Theme Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="min-h-[300px]">
+                  <ThemeForm
+                    themeData={themeData}
+                    onThemeChange={setThemeData}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            {/* Preview Section */}
+            <div className="w-full min-w-[54rem]">
+              <Card className="w-full border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold text-center">
+                    VS Code Preview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CodePreview themeData={themeData} />
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
-          {/* Preview Section - Below Form */}
-          <div className="space-y-6">
-            <Card className='border-gray-200'>
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold text-center">
-                  VS Code Preview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CodePreview themeData={themeData} />
-              </CardContent>
-            </Card>
-
-            <Card className='border-gray-200'>
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold text-center">
-                  Export Theme
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ThemeExporter theme={generateVSTheme()} />
-              </CardContent>
-            </Card>
-          </div>
+          <Card className='border-gray-200'>
+            <CardHeader>
+              <CardTitle className="text-2xl font-semibold text-center">
+                Export Theme
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ThemeExporter theme={generateVSTheme()} />
+            </CardContent>
+          </Card>
         </div>
-      </main>
-    </div>
+      </main >
+    </div >
+
   )
 }
 
