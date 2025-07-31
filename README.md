@@ -15,6 +15,10 @@ A web application that allows you to create and customize your own Visual Studio
 
 ## 🚀 Getting Started
 
+### Live Demo
+
+🌐 **Try it online**: [VS Code Theme Creator](https://yourusername.github.io/vsthemecreator/)
+
 ### Prerequisites
 
 - Node.js (version 16 or higher)
@@ -39,6 +43,15 @@ npm run dev
 ```
 
 4. Open your browser and navigate to `http://localhost:5173`
+
+### Deployment
+
+This project is configured for automatic deployment to GitHub Pages. To deploy:
+
+1. Push your code to the `main` branch
+2. Go to your repository Settings → Pages
+3. Set the source to "GitHub Actions"
+4. The site will be automatically deployed at `https://yourusername.github.io/vsthemecreator/`
 
 ## 🎯 How to Use
 
